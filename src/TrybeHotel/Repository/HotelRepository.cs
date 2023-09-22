@@ -16,16 +16,17 @@ namespace TrybeHotel.Repository
         public IEnumerable<HotelDto> GetHotels()
         {
             var hotels = _context.Hotels
-            .Include(h => h.City)
-            .Select(hotel => new HotelDto
-            {
-                HotelId = hotel.HotelId,
-                Name = hotel.Name,
-                Address = hotel.Address,
-                CityId = hotel.CityId,
-                CityName = hotel.City!.Name
-            })
-            .ToList();
+                .Include(h => h.City)
+                .Select(hotel => new HotelDto
+                {
+                    HotelId = hotel.HotelId,
+                    Name = hotel.Name,
+                    Address = hotel.Address,
+                    CityId = hotel.CityId,
+                    CityName = hotel.City!.Name,
+                    State = hotel.City!.State
+                })
+                .ToList();
 
             return hotels;
         }
