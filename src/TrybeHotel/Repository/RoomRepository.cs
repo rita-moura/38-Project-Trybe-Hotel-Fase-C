@@ -14,30 +14,35 @@ namespace TrybeHotel.Repository
         // 7. Refatore o endpoint GET /room
         public IEnumerable<RoomDto> GetRooms(int HotelId)
         {
-            var rooms = _context.Rooms
-                .Where(room => room.HotelId == HotelId)
-                .Select(room => new RoomDto
+            var hotel = _context.Hotels.First(h => h.HotelId == HotelId);
+            var city = _context.Cities.First(c => c.CityId == hotel.CityId);
+            var rooms = _context.Rooms.Where(r => r.HotelId == HotelId).ToList();
+            
+            var roomDtos = rooms.Select(room => new RoomDto
+            {
+                RoomId = room.RoomId,
+                Name = room.Name,
+                Capacity = room.Capacity,
+                Image = room.Image,
+                Hotel = new HotelDto
                 {
-                    RoomId = room.RoomId,
-                    Name = room.Name,
-                    Capacity = room.Capacity,
-                    Image = room.Image,
-                    Hotel = new HotelDto
-                    {
-                        HotelId = room.Hotel!.HotelId,
-                        Name = room.Hotel.Name,
-                        Address = room.Hotel.Address,
-                        CityId = room.Hotel.CityId,
-                        CityName = room.Hotel.City!.Name
-                    }
-                })
-                .ToList();
-
-            return rooms;
+                    HotelId = hotel.HotelId,
+                    Name = hotel.Name,
+                    Address = hotel.Address,
+                    CityId = city.CityId,
+                    CityName = city.Name,
+                    State = city.State
+                }
+            });
+            
+            return roomDtos;
         }
 
         // 8. Refatore o endpoint POST /room
         public RoomDto AddRoom(Room room) {
+            var hotel = _context.Hotels.First(h => h.HotelId == room.HotelId);
+            var city = _context.Cities.First(c => c.CityId == hotel.CityId);
+
             _context.Rooms.Add(room);
             _context.SaveChanges();
 
@@ -47,20 +52,14 @@ namespace TrybeHotel.Repository
                 Name = room.Name,
                 Capacity = room.Capacity,
                 Image = room.Image,
-                Hotel = _context.Hotels
-                .Where(hotel => hotel.HotelId == room.HotelId)
-                .Select(h => new HotelDto
+                Hotel = new HotelDto
                 {
-                    HotelId = h.HotelId,
-                    Name = h.Name,
-                    Address = h.Address,
-                    CityId = h.CityId,
-                    CityName = _context.Cities
-                    .Where(city => city.CityId == h.CityId)
-                    .Select(c => c.Name)
-                    .FirstOrDefault()
-                })
-                .FirstOrDefault()
+                    HotelId = hotel.HotelId,
+                    Name = hotel.Name,
+                    Address = hotel.Address,
+                    CityId = hotel.CityId,
+                    CityName = city.Name,
+                }
             };
         }
 
