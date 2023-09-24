@@ -1,6 +1,9 @@
 using System.Net.Http;
 using TrybeHotel.Dto;
 using TrybeHotel.Repository;
+using System;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace TrybeHotel.Services
 {
@@ -15,7 +18,25 @@ namespace TrybeHotel.Services
         // 11. Desenvolva o endpoint GET /geo/status
         public async Task<object> GetGeoStatus()
         {
-            throw new NotImplementedException();
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _client.DefaultRequestHeaders.UserAgent.ParseAdd("aspnet-user-agent");
+            
+            try
+            {
+                HttpResponseMessage response = await _client.GetAsync("https://nominatim.openstreetmap.org/status.php?format=json");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    return content;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro na requisição: {ex.Message}");
+            }
+
+            return default!;
         }
         
         // 12. Desenvolva o endpoint GET /geo/address
