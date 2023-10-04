@@ -1,9 +1,10 @@
-using System.Net.Http;
-using TrybeHotel.Dto;
-using TrybeHotel.Repository;
 using System;
+using System.Net.Http;
+using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using TrybeHotel.Repository;
+using TrybeHotel.Dto;
 
 namespace TrybeHotel.Services
 {
@@ -42,7 +43,33 @@ namespace TrybeHotel.Services
         // 12. Desenvolva o endpoint GET /geo/address
         public async Task<GeoDtoResponse> GetGeoLocation(GeoDto geoDto)
         {
-            throw new NotImplementedException();
+                        // Montar a URL de consulta com base nos parâmetros fornecidos
+            string apiUrl = $"https://nominatim.openstreetmap.org/search?street={geoDto.Address}&city={geoDto.City}&state={geoDto.State}&country=Brazil&format=json&limit=1";
+
+            // Configurar headers
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _client.DefaultRequestHeaders.UserAgent.ParseAdd("aspnet-user-agent");
+
+            try
+            {
+                // Realizar a requisição GET à API externa
+                HttpResponseMessage response = await _client.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Processar a resposta JSON
+                    var content = await response.Content.ReadAsAsync<List<GeoDtoResponse>>();
+                    return content.Count > 0 ? content[0] : null;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Lidar com erros, log ou tratar de acordo com os requisitos.
+                Console.WriteLine($"Erro na requisição: {ex.Message}");
+            }
+
+            // Se a requisição não retornar com sucesso, retorne um valor padrão.
+            return null!;
         }
 
         // 12. Desenvolva o endpoint GET /geo/address
